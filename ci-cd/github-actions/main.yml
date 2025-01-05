@@ -17,25 +17,26 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      - name: Log in to Docker Hub
+      - name: Authenticate with AWS ECR
         env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login --username "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          aws ecr get-login-password --region ap-southeast-1 | docker login --username AWS --password-stdin 692859924695.dkr.ecr.ap-southeast-1.amazonaws.com
 
       - name: Build Docker Images
         run: |
-          docker build -t nisurim/patient-record-service ./patient-record-service
-          docker build -t nisurim/notification-service ./notification-service
-          docker build -t nisurim/appointment-service ./appointment-service
-          docker build -t nisurim/aggregator-service ./aggregator-service
+          docker build -t 692859924695.dkr.ecr.ap-southeast-1.amazonaws.com/patient-record-service:latest ./patient-record-service
+          docker build -t 692859924695.dkr.ecr.ap-southeast-1.amazonaws.com/notification-service:latest ./notification-service
+          docker build -t 692859924695.dkr.ecr.ap-southeast-1.amazonaws.com/appointment-service:latest ./appointment-scheduling-service
+          docker build -t 692859924695.dkr.ecr.ap-southeast-1.amazonaws.com/aggregator-service:latest ./aggregator-service
 
-      - name: Push Docker Images to Docker Hub
+      - name: Push Docker Images to AWS ECR
         run: |
-          docker push nisurim/patient-record-service
-          docker push nisurim/notification-service
-          docker push nisurim/appointment-service
-          docker push nisurim/aggregator-service
+          docker push 692859924695.dkr.ecr.ap-southeast-1.amazonaws.com/patient-record-service:latest
+          docker push 692859924695.dkr.ecr.ap-southeast-1.amazonaws.com/notification-service:latest
+          docker push 692859924695.dkr.ecr.ap-southeast-1.amazonaws.com/appointment-service:latest
+          docker push 692859924695.dkr.ecr.ap-southeast-1.amazonaws.com/aggregator-service:latest
 
   deploy:
     needs: build-and-test
