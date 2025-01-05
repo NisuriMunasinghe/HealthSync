@@ -1,28 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: appointment-scheduling-service-deployment
+  name: appointment-service-deployment
   labels:
-    app: appointment-scheduling-service
+    app: appointment-service
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: appointment-scheduling-service
+      app: appointment-service
   template:
     metadata:
       labels:
-        app: appointment-scheduling-service
+        app: appointment-service
     spec:
       containers:
-      - name: appointment-scheduling-service
-        image: 692859924695.dkr.ecr.ap-southeast-1.amazonaws.com/appointment-scheduling-service:latest
+      - name: appointment-service
+        image: 692859924695.dkr.ecr.ap-southeast-1.amazonaws.com/nisurim/appointment-service:latest
         ports:
-        - containerPort: 5001
-        resources:
-          limits:
-            memory: "512Mi"
-            cpu: "500m"
-          requests:
-            memory: "256Mi"
-            cpu: "250m"
+        - containerPort: 8081

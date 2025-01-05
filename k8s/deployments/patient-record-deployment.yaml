@@ -16,13 +16,6 @@ spec:
     spec:
       containers:
       - name: patient-record-service
-        image: 692859924695.dkr.ecr.ap-southeast-1.amazonaws.com/patient-record-service:latest
+        image: 692859924695.dkr.ecr.ap-southeast-1.amazonaws.com/nisurim/patient-record-service:latest
         ports:
-        - containerPort: 5000
-        resources:
-          limits:
-            memory: "512Mi"
-            cpu: "500m"
-          requests:
-            memory: "256Mi"
-            cpu: "250m"
+        - containerPort: 8083

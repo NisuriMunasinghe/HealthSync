@@ -16,13 +16,6 @@ spec:
     spec:
       containers:
       - name: notification-service
-        image: 692859924695.dkr.ecr.ap-southeast-1.amazonaws.com/notification-service:latest
+        image: 692859924695.dkr.ecr.ap-southeast-1.amazonaws.com/nisurim/notification-service:latest
         ports:
-        - containerPort: 5002
-        resources:
-          limits:
-            memory: "512Mi"
-            cpu: "500m"
-          requests:
-            memory: "256Mi"
-            cpu: "250m"
+        - containerPort: 8082
