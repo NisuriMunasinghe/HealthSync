@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: aggregator
-        image: <ACCOUNT-ID>.dkr.ecr.<AWS-REGION>.amazonaws.com/aggregator-service:latest
+        image: 692859924695.dkr.ecr.ap-southeast-1.amazonaws.com/aggregator-service:latest
         ports:
         - containerPort: 5003
         env:
