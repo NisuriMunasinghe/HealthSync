@@ -1,0 +1,80 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: '0 0 * * *' # Daily integration tests at midnight
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Log in to Docker Hub
+      env:
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login --username "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+    - name: Build Docker Images
+      run: |
+        docker build -t nisurim/patient-record-service ./patient-record-service
+        docker build -t nisurim/notification-service ./notification-service
+        docker build -t nisurim/appointment-service ./appointment-service
+        docker build -t nisurim/aggregator-service ./aggregator-service
+
+    - name: Push Docker Images to Docker Hub
+      run: |
+        docker push nisurim/patient-record-service
+        docker push nisurim/notification-service
+        docker push nisurim/appointment-service
+        docker push nisurim/aggregator-service
+
+  deploy:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Configure AWS CLI
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      run: |
+        aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+        aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+        aws configure set default.region ap-southeast-1
+
+    - name: Configure kubectl for EKS
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      run: |
+        aws eks update-kubeconfig --region ap-southeast-1 --name EKS-healthsync-new-cluster
+
+    - name: Rolling Deployment
+      run: |
+        kubectl apply -f k8s/deployments/
+        kubectl rollout status deployment/patient-record-service
+        kubectl rollout status deployment/notification-service
+        kubectl rollout status deployment/appointment-service
+        kubectl rollout status deployment/aggregator-service
+
+  integration-tests:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Run Integration Tests
+      run: |
+        pytest tests/integration

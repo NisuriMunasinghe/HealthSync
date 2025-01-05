@@ -1,0 +1,64 @@
+pipeline {
+    agent any
+    environment {
+        DOCKER_USERNAME = credentials('docker-username') // Ensure this is the correct Jenkins credential ID
+        DOCKER_PASSWORD = credentials('docker-password') // Ensure this is the correct Jenkins credential ID
+    }
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/your-repo-name/your-project.git'
+            }
+        }
+        stage('Build Docker Images') {
+            steps {
+                sh '''
+                docker build -t $DOCKER_USERNAME/patient-record-service ./patient-record-service
+                docker build -t $DOCKER_USERNAME/notification-service ./notification-service
+                docker build -t $DOCKER_USERNAME/appointment-service ./appointment-service
+                docker build -t $DOCKER_USERNAME/aggregator-service ./aggregator-service
+                '''
+            }
+        }
+        stage('Test') {
+            steps {
+                sh '''
+                chmod +x ./scripts/test.sh
+                ./scripts/test.sh
+                '''
+            }
+        }
+        stage('Push Docker Images') {
+            steps {
+                script {
+                    sh '''
+                    echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
+                    docker push $DOCKER_USERNAME/patient-record-service
+                    docker push $DOCKER_USERNAME/notification-service
+                    docker push $DOCKER_USERNAME/appointment-service
+                    docker push $DOCKER_USERNAME/aggregator-service
+                    '''
+                }
+            }
+        }
+        stage('Deploy to Kubernetes') {
+            steps {
+                sh '''
+                kubectl apply -f k8s/deployments/
+                kubectl rollout status deployment/patient-record-service
+                kubectl rollout status deployment/notification-service
+                kubectl rollout status deployment/appointment-service
+                kubectl rollout status deployment/aggregator-service
+                '''
+            }
+        }
+    }
+    post {
+        success {
+            echo 'Pipeline executed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed. Please check logs for errors.'
+        }
+    }
+}
