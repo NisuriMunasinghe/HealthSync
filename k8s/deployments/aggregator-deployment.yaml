@@ -1,11 +1,11 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: aggregator-deployment
+  name: aggregator-service-deployment
   labels:
     app: aggregator-service
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: aggregator-service
@@ -15,7 +15,14 @@ spec:
         app: aggregator-service
     spec:
       containers:
-      - name: aggregator
-        image: aggregator-service:latest
+      - name: aggregator-service
+        image: 692859924695.dkr.ecr.ap-southeast-1.amazonaws.com/aggregator-service:latest
         ports:
         - containerPort: 5003
+        resources:
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+          requests:
+            memory: "256Mi"
+            cpu: "250m"

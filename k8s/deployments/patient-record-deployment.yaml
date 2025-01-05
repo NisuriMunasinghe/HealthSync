@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: patient-record-deployment
+  name: patient-record-service-deployment
   labels:
     app: patient-record-service
 spec:
@@ -15,7 +15,14 @@ spec:
         app: patient-record-service
     spec:
       containers:
-      - name: patient-record
-        image: patient-record-service:latest
+      - name: patient-record-service
+        image: 692859924695.dkr.ecr.ap-southeast-1.amazonaws.com/patient-record-service:latest
         ports:
         - containerPort: 5000
+        resources:
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+          requests:
+            memory: "256Mi"
+            cpu: "250m"

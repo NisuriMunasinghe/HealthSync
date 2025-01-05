@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: appointment-scheduling-deployment
+  name: appointment-scheduling-service-deployment
   labels:
     app: appointment-scheduling-service
 spec:
@@ -15,7 +15,14 @@ spec:
         app: appointment-scheduling-service
     spec:
       containers:
-      - name: appointment-scheduling
-        image: appointment-scheduling-service:latest
+      - name: appointment-scheduling-service
+        image: 692859924695.dkr.ecr.ap-southeast-1.amazonaws.com/appointment-scheduling-service:latest
         ports:
         - containerPort: 5001
+        resources:
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+          requests:
+            memory: "256Mi"
+            cpu: "250m"

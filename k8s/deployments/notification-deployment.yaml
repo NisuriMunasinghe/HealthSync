@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: notification-deployment
+  name: notification-service-deployment
   labels:
     app: notification-service
 spec:
@@ -15,7 +15,14 @@ spec:
         app: notification-service
     spec:
       containers:
-      - name: notification
-        image: notification-service:latest
+      - name: notification-service
+        image: 692859924695.dkr.ecr.ap-southeast-1.amazonaws.com/notification-service:latest
         ports:
         - containerPort: 5002
+        resources:
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
